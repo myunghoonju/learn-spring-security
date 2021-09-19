@@ -35,5 +35,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.rememberMeParameter("remember") // default "remember-me"
 				.tokenValiditySeconds(3600) // 1 hr
 				.userDetailsService(userDetailsService);
+		http
+				.sessionManagement()
+				.sessionFixation().changeSessionId(); // default after servlet 3.1
+				// migrateSession below 3.1
+				// newSession
+				// none
+
 	}
 }
