@@ -22,8 +22,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.anyRequest().authenticated();
 		http
 				.formLogin();
-		//custom
-		//custom
 		http
 				.logout()
 				.logoutUrl("/logout") // post (default)
