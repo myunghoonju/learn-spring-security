@@ -37,7 +37,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.userDetailsService(userDetailsService);
 		http
 				.sessionManagement()
-				.sessionFixation().changeSessionId(); // default after servlet 3.1
+				.maximumSessions(1)
+				.maxSessionsPreventsLogin(true);
+				//.sessionFixation().changeSessionId(); // default after servlet 3.1
 				// migrateSession below 3.1
 				// newSession
 				// none
