@@ -51,6 +51,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.formLogin()
 						.successHandler((HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) -> {
 							RequestCache requestCache = new HttpSessionRequestCache();
+							// ExceptionTranslationFilter, RequestCacheAwareFilter, HttpSessionRequestCache
 							SavedRequest savedRequest = requestCache.getRequest(httpServletRequest, httpServletResponse);
 							String redirUrl = savedRequest.getRedirectUrl();
 							System.out.println("redir:: " + redirUrl);
