@@ -40,6 +40,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+/*
+		// FilterChainProxy에 모든 필터 목록
+		// CsrfFilter에서 토큰 발급 X-CSRF-TOKEN
+		http
+				.authorizeRequests()
+				.anyRequest().permitAll();
+		http
+				.formLogin();
+*/
+
 		http
 				.authorizeRequests()
 				.antMatchers("/login").permitAll()
