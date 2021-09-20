@@ -1,6 +1,7 @@
 package org.learn.security.study.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,6 +25,7 @@ import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
+//@Order(1)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private final UserDetailsService userDetailsService;
 
@@ -48,6 +50,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.anyRequest().permitAll();
 		http
 				.formLogin();
+	}
+*/
+
+/*
+	// multi filter chains
+
+	http
+			.authorizeRequests()
+			.anyRequest().authenticated();
+	http
+				.formLogin();
+}
 */
 
 		http
