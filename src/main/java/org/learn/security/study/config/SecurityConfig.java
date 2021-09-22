@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -42,6 +43,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+
+		http.authorizeRequests().anyRequest().authenticated();
+		http.formLogin();
+
+		SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+
 /*
 		// FilterChainProxy에 모든 필터 목록
 		// CsrfFilter에서 토큰 발급 X-CSRF-TOKEN
@@ -64,6 +71,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 }
 */
 
+	/*
 		http
 				.authorizeRequests()
 				.antMatchers("/login").permitAll()
@@ -83,9 +91,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 						});
 		http
 				.exceptionHandling()
-						/*.authenticationEntryPoint((httpServletRequest, httpServletResponse, e) -> {
+						*//*.authenticationEntryPoint((httpServletRequest, httpServletResponse, e) -> {
 							httpServletResponse.sendRedirect("/login"); // not authenticated -> 	.antMatchers("/login").permitAll()
-						})*/
+						})*//*
 						.accessDeniedHandler((httpServletRequest, httpServletResponse, e) -> {
 							httpServletResponse.sendRedirect("/denied"); // already authenticated
 						});
@@ -110,6 +118,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				// migrateSession below 3.1
 				// newSession
 				// none
-
+*/
 	}
 }
