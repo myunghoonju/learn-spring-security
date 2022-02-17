@@ -1,123 +1,44 @@
 package org.learn.security.study.config;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.access.AccessDeniedHandler;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
-import org.springframework.security.web.savedrequest.RequestCache;
-import org.springframework.security.web.savedrequest.SavedRequest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
-
-@Configuration
+@Slf4j
 @EnableWebSecurity
-//@Order(1)
+@Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-	private final UserDetailsService userDetailsService;
 
-	public SecurityConfig(UserDetailsService userDetailsService) {
-		this.userDetailsService = userDetailsService;
-	}
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        String password = passwordEncoder().encode("1111");
+        auth.inMemoryAuthentication().withUser("user").password(password).roles("USER");
+        auth.inMemoryAuthentication().withUser("manager").password(password).roles("USER","MANAGER");
+        auth.inMemoryAuthentication().withUser("admin").password(password).roles("USER","MANAGER","ADMIN");
+    }
 
-	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.inMemoryAuthentication().withUser("user").password("{noop}1234").roles("USER");
-		auth.inMemoryAuthentication().withUser("sys").password("{noop}1234").roles("SYS");
-		auth.inMemoryAuthentication().withUser("admin").password("{noop}1234").roles("ADMIN");
-	}
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                .authorizeRequests()
+                .antMatchers("/").permitAll()
+                .antMatchers("/mypage").hasRole("USER")
+                .antMatchers("/messages").hasRole("MANAGER")
+                .antMatchers("/config").hasRole("ADMIN")
+                .anyRequest().authenticated()
 
-		http.authorizeRequests().anyRequest().authenticated();
-		http.formLogin();
-
-		SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
-
-/*
-		// FilterChainProxy에 모든 필터 목록
-		// CsrfFilter에서 토큰 발급 X-CSRF-TOKEN
-		http
-				.authorizeRequests()
-				.anyRequest().permitAll();
-		http
-				.formLogin();
-	}
-*/
-
-/*
-	// multi filter chains
-
-	http
-			.authorizeRequests()
-			.anyRequest().authenticated();
-	http
-				.httpBasic();
-}
-*/
-
-	/*
-		http
-				.authorizeRequests()
-				.antMatchers("/login").permitAll()
-				.antMatchers("/user").hasRole("USER")
-				.antMatchers("/admin/pay").hasRole("ADMIN")
-				.antMatchers("/admin/**").access("hasRole('ADMIN') or hasRole('SYS')")
-				.anyRequest().authenticated();
-		http
-				.formLogin()
-						.successHandler((HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) -> {
-							RequestCache requestCache = new HttpSessionRequestCache();
-							// ExceptionTranslationFilter, RequestCacheAwareFilter, HttpSessionRequestCache
-							SavedRequest savedRequest = requestCache.getRequest(httpServletRequest, httpServletResponse);
-							String redirUrl = savedRequest.getRedirectUrl();
-							System.out.println("redir:: " + redirUrl);
-							httpServletResponse.sendRedirect(redirUrl);
-						});
-		http
-				.exceptionHandling()
-						*//*.authenticationEntryPoint((httpServletRequest, httpServletResponse, e) -> {
-							httpServletResponse.sendRedirect("/login"); // not authenticated -> 	.antMatchers("/login").permitAll()
-						})*//*
-						.accessDeniedHandler((httpServletRequest, httpServletResponse, e) -> {
-							httpServletResponse.sendRedirect("/denied"); // already authenticated
-						});
-		http
-				.logout()
-				.logoutUrl("/logout") // post (default)
-				.addLogoutHandler((httpServletRequest, httpServletResponse, authentication) -> {
-					HttpSession session = httpServletRequest.getSession();
-					session.invalidate();
-				})
-				.logoutSuccessHandler((httpServletRequest, httpServletResponse, authentication) -> httpServletResponse.sendRedirect("/login"))
-				.and()
-				.rememberMe()
-				.rememberMeParameter("remember") // default "remember-me"
-				.tokenValiditySeconds(3600) // 1 hr
-				.userDetailsService(userDetailsService);
-		http
-				.sessionManagement()
-				.maximumSessions(1)
-				.maxSessionsPreventsLogin(true);
-				//.sessionFixation().changeSessionId(); // default after servlet 3.1
-				// migrateSession below 3.1
-				// newSession
-				// none
-*/
-	}
+                .and()
+                .formLogin();
+    }
 }
