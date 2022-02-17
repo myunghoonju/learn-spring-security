@@ -1,4 +1,4 @@
-package org.learn.security.study.web.controller.user;
+package org.learn.security.study.web.user;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
