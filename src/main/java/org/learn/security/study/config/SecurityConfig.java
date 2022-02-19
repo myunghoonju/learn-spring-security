@@ -2,6 +2,7 @@ package org.learn.security.study.config;
 
 import lombok.RequiredArgsConstructor;
 import org.learn.security.study.config.details.FormAuthenticationDetailSource;
+import org.learn.security.study.config.handlers.CustomAccessDeniedHandler;
 import org.learn.security.study.config.handlers.CustomAuthenticationFailureHandler;
 import org.learn.security.study.config.handlers.CustomAuthenticationSuccessHandler;
 import org.learn.security.study.config.provider.CustomAuthenticationProvider;
@@ -27,6 +28,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final FormAuthenticationDetailSource detailSource;
     private final CustomAuthenticationSuccessHandler successHandler;
     private final CustomAuthenticationFailureHandler failureHandler;
+    private final CustomAccessDeniedHandler deniedHandler;
+
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) {
@@ -57,15 +60,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .formLogin()
                 .loginPage("/login")
                 .loginProcessingUrl("/login_proc")
-                .authenticationDetailsSource(detailSource)
                 .defaultSuccessUrl("/")
+                .authenticationDetailsSource(detailSource)
                 .successHandler(successHandler)
                 .failureHandler(failureHandler)
-                .permitAll();
+                .permitAll()
+
+                .and()
+                .exceptionHandling()
+                .accessDeniedHandler(deniedHandler);
     }
 
     @Override
-    public void configure(WebSecurity web) throws Exception {
+    public void configure(WebSecurity web) {
         web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 }

@@ -1,5 +1,6 @@
 package org.learn.security.study.web.login;
 
+import org.learn.security.study.domain.entity.Account;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -33,5 +34,14 @@ public class LoginController {
         return "redirect:/login";
     }
 
+    @GetMapping("/deny")
+    public String deny(@RequestParam(required = false) String exception, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Account account = (Account) authentication.getPrincipal();
 
+        model.addAttribute("username", account.getUsername());
+        model.addAttribute("exception", exception);
+
+        return "user/login/deny";
+    }
 }
