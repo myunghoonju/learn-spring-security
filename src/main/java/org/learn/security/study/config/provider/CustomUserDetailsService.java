@@ -1,5 +1,6 @@
-package org.learn.security.study.config;
+package org.learn.security.study.config.provider;
 
+import org.learn.security.study.config.AccountContext;
 import org.learn.security.study.domain.entity.Account;
 import org.learn.security.study.domain.repository.UserRepository;
 import org.springframework.security.core.GrantedAuthority;
