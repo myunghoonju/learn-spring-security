@@ -10,6 +10,8 @@ import org.learn.security.study.config.provider.CustomUserDetailsService;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,11 +19,11 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @RequiredArgsConstructor
 @EnableWebSecurity
 @Configuration
+@Order(2) //FIXME ORDER doesn't work
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final CustomUserDetailsService customUserDetailsService;
@@ -30,27 +32,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final CustomAuthenticationFailureHandler failureHandler;
     private final CustomAccessDeniedHandler deniedHandler;
 
-
     @Override
     protected void configure(AuthenticationManagerBuilder auth) {
-        auth.authenticationProvider(authenticationProvider());
+        auth.authenticationProvider(customAuthenticationProvider());
     }
 
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        return new CustomAuthenticationProvider(customUserDetailsService, passwordEncoder());
+    @Override
+    public void configure(WebSecurity web) {
+        web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/", "/users", "/login*","/user/login/**").permitAll()
+                .antMatchers("/", "/users", "/login*", "/user/login/**").permitAll()
                 .antMatchers("/mypage").hasRole("USER")
                 .antMatchers("/messages").hasRole("MANAGER")
                 .antMatchers("/config").hasRole("ADMIN")
@@ -71,8 +72,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .accessDeniedHandler(deniedHandler);
     }
 
-    @Override
-    public void configure(WebSecurity web) {
-        web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+    @Bean
+    public AuthenticationProvider customAuthenticationProvider() {
+        return new CustomAuthenticationProvider(customUserDetailsService, new BCryptPasswordEncoder());
     }
 }
