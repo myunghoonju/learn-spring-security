@@ -20,10 +20,48 @@
                 <div class="form-group">
                     <input type="password" class="form-control" name="password" placeholder="비밀번호" required="required">
                 </div>
-                <button type="submit" class="btn btn-lg btn-primary btn-block">로그인</button>
+                <button type="button" onclick="formLogin()" id="formbtn" class="btn btn-lg btn-primary btn-block">로그인</button>
+<!--                <button type="submit" class="btn btn-lg btn-primary btn-block">로그인</button>-->
             </form>
         </div>
     </div>
 </div>
+<script>
+    function formLogin() {
+        let username = $("input[name='username']").val().trim();
+        let password = $("input[name='password']").val().trim();
+        let data = {
+            "username": username,
+            "password": password
+        }
+        let csrfHeader = $('meta[name="_csrf_header"]').attr('content')
+        let csrfToken = $('meta[name="_csrf"]').attr('content')
+
+        $.ajax({
+         type: 'post',
+         url: '/api/login',
+         data: JSON.stringify(data),
+         dataType: 'json',
+         beforeSend:(xhr) => {
+             xhr.setRequestHeader(csrfHeader, csrfToken);
+             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+             xhr.setRequestHeader('Content-type', 'application/json');
+         },
+         success:(data) => {
+             window.location.replace('/');
+         },
+            error : function(res) {
+                let status = res.status;
+                let error = res.statusText.error;
+                let params = '?error=true&exception='+ error;
+                if (status == '401') {
+                    window.location.replace('/login'+params);
+                } else if (status == '403') {
+                    window.location.replace('/denied'+params);
+                }
+            }
+        });
+    }
+</script>
 </body>
 </html>
